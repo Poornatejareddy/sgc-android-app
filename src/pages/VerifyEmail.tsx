@@ -1,18 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
-import { AlertCircle, Mail, CheckCircle } from 'lucide-react';
+import { AlertCircle, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function VerifyEmail() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useAuth();
 
     const email = location.state?.email || '';
-    const name = location.state?.name || '';
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [loading, setLoading] = useState(false);
@@ -165,8 +162,8 @@ export default function VerifyEmail() {
                                 onClick={handleResend}
                                 disabled={countdown > 0 || resending}
                                 className={`font-semibold ${countdown > 0 || resending
-                                        ? 'text-gray-400 cursor-not-allowed'
-                                        : 'text-blue-600 hover:text-blue-700'
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-blue-600 hover:text-blue-700'
                                     }`}
                             >
                                 {resending ? 'Sending...' : countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}

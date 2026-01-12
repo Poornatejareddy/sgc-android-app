@@ -59,7 +59,7 @@ export default function Signup() {
         setLoading(true);
 
         try {
-            const response = await authService.signup({
+            await authService.signup({
                 name: formData.name,
                 email: formData.email,
                 password: formData.password,
