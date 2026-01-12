@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$/;
+
 export default function Signup() {
-    const { signup } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -16,34 +18,70 @@ export default function Signup() {
         name: '',
         email: '',
         password: '',
+        confirmPassword: '',
         role: 'student'
     });
+
+    const [passwordChecks, setPasswordChecks] = useState({
+        length: false,
+        uppercase: false,
+        number: false,
+        special: false
+    });
+
+    const handlePasswordChange = (value: string) => {
+        setFormData({ ...formData, password: value });
+
+        setPasswordChecks({
+            length: value.length >= 8,
+            uppercase: /[A-Z]/.test(value),
+            number: /[0-9]/.test(value),
+            special: /[^A-Za-z0-9]/.test(value)
+        });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        // Basic validation
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters long');
-            toast.error('Password must be at least 6 characters long');
+        // Validation
+        if (!PASSWORD_REGEX.test(formData.password)) {
+            setError('Password does not meet requirements');
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            toast.error('Passwords do not match');
             return;
         }
 
         setLoading(true);
 
         try {
-            await signup(formData);
-            toast.success('Account created successfully!');
-            navigate('/');
+            const response = await authService.signup({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                role: formData.role
+            });
+
+            toast.success('OTP sent to your email!');
+
+            // Navigate to OTP verification
+            navigate('/verify-email', {
+                state: { email: formData.email, name: formData.name }
+            });
         } catch (err: any) {
-            const errorMsg = err.response?.data?.message || 'Failed to create account. Please try again.';
+            const errorMsg = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Failed to create account';
             setError(errorMsg);
             toast.error(errorMsg);
         } finally {
             setLoading(false);
         }
     };
+
+    const allChecksPassed = Object.values(passwordChecks).every(check => check);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col justify-center px-6 py-8">
@@ -86,13 +124,34 @@ export default function Signup() {
                             className="h-14 text-base"
                         />
 
+                        <div>
+                            <Input
+                                label="Password"
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => handlePasswordChange(e.target.value)}
+                                icon={<Lock className="w-5 h-5" />}
+                                placeholder="Create a strong password"
+                                required
+                                className="h-14 text-base"
+                            />
+
+                            {/* Password Requirements */}
+                            <div className="mt-3 space-y-2 text-xs">
+                                <PasswordCheck met={passwordChecks.length} text="At least 8 characters" />
+                                <PasswordCheck met={passwordChecks.uppercase} text="One uppercase letter" />
+                                <PasswordCheck met={passwordChecks.number} text="One number" />
+                                <PasswordCheck met={passwordChecks.special} text="One special character" />
+                            </div>
+                        </div>
+
                         <Input
-                            label="Password"
+                            label="Confirm Password"
                             type="password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                             icon={<Lock className="w-5 h-5" />}
-                            placeholder="At least 6 characters"
+                            placeholder="Confirm your password"
                             required
                             className="h-14 text-base"
                         />
@@ -107,6 +166,7 @@ export default function Signup() {
                         <Button
                             type="submit"
                             isLoading={loading}
+                            disabled={!allChecksPassed || loading}
                             className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                         >
                             {loading ? 'Creating account...' : 'Create Account'}
@@ -126,6 +186,19 @@ export default function Signup() {
                     ← Back to Welcome
                 </Link>
             </div>
+        </div>
+    );
+}
+
+function PasswordCheck({ met, text }: { met: boolean; text: string }) {
+    return (
+        <div className={`flex items-center gap-2 ${met ? 'text-green-600' : 'text-gray-400'}`}>
+            {met ? (
+                <CheckCircle className="w-4 h-4" />
+            ) : (
+                <div className="w-4 h-4 rounded-full border-2 border-current" />
+            )}
+            <span>{text}</span>
         </div>
     );
 }

@@ -7,6 +7,8 @@ import { Toaster } from 'react-hot-toast';
 import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import VerifyEmail from './pages/VerifyEmail';
+import PendingApproval from './pages/PendingApproval';
 import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
@@ -49,6 +51,8 @@ function App() {
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/pending-approval" element={<PendingApproval />} />
 
             {/* Protected Routes */}
             <Route path="/" element={

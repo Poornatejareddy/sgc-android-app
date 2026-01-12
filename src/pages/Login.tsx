@@ -23,11 +23,38 @@ export default function Login() {
         setLoading(true);
 
         try {
-            await login(formData);
+            const response = await login(formData);
+
+            // Check for account status issues
+            if (response.user.status !== 'active') {
+                const statusMsg = `Your account is ${response.user.status}. Please contact support.`;
+                setError(statusMsg);
+                toast.error(statusMsg);
+                localStorage.removeItem('token');
+                return;
+            }
+
+            // Check for student approval
+            if (response.user.role === 'student' && !response.user.isApproved) {
+                navigate('/pending-approval', { state: { user: response.user } });
+                return;
+            }
+
             toast.success('Welcome back!');
             navigate('/');
         } catch (err: any) {
-            const errorMsg = err.response?.data?.message || 'Failed to login. Please check your credentials.';
+            let errorMsg = 'Failed to login';
+
+            if (err.response?.status === 403) {
+                errorMsg = err.response.data.message || 'Account verification required';
+            } else if (err.response?.status === 404) {
+                errorMsg = 'User not found. Please check your email.';
+            } else if (err.response?.status === 401) {
+                errorMsg = 'Invalid email or password';
+            } else {
+                errorMsg = err.response?.data?.message || 'Failed to login';
+            }
+
             setError(errorMsg);
             toast.error(errorMsg);
         } finally {
