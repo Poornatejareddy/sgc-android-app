@@ -23,36 +23,48 @@ export default function Login() {
         setLoading(true);
 
         try {
+            console.log('Attempting login with:', formData.email);
             const response = await login(formData);
+            console.log('Login response:', response);
 
             // Check for account status issues
-            if (response.user.status !== 'active') {
+            if (response?.user?.status && response.user.status !== 'active') {
                 const statusMsg = `Your account is ${response.user.status}. Please contact support.`;
                 setError(statusMsg);
                 toast.error(statusMsg);
                 localStorage.removeItem('token');
+                setLoading(false);
                 return;
             }
 
             // Check for student approval
-            if (response.user.role === 'student' && !response.user.isApproved) {
+            if (response?.user?.role === 'student' && !response.user.isApproved) {
                 navigate('/pending-approval', { state: { user: response.user } });
+                setLoading(false);
                 return;
             }
 
             toast.success('Welcome back!');
             navigate('/');
         } catch (err: any) {
+            console.error('Login error:', err);
+            console.error('Error response:', err.response);
+            console.error('Error message:', err.message);
+
             let errorMsg = 'Failed to login';
 
-            if (err.response?.status === 403) {
+            if (!err.response) {
+                errorMsg = 'Cannot connect to server. Please check your internet connection.';
+            } else if (err.response?.status === 403) {
                 errorMsg = err.response.data.message || 'Account verification required';
             } else if (err.response?.status === 404) {
                 errorMsg = 'User not found. Please check your email.';
             } else if (err.response?.status === 401) {
                 errorMsg = 'Invalid email or password';
-            } else {
-                errorMsg = err.response?.data?.message || 'Failed to login';
+            } else if (err.response?.data?.message) {
+                errorMsg = err.response.data.message;
+            } else if (err.response?.data?.errors?.[0]?.msg) {
+                errorMsg = err.response.data.errors[0].msg;
             }
 
             setError(errorMsg);
