@@ -16,6 +16,14 @@ const config: CapacitorConfig = {
       iosSpinnerStyle: 'small',
       spinnerColor: '#3b82f6'
     }
+  },
+  server: {
+    androidScheme: 'https',
+    cleartext: true,
+    allowNavigation: [
+      'api.shreegurucool.in',
+      'shreegurucool.in'
+    ]
   }
 };
 
