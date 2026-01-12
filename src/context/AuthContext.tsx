@@ -14,6 +14,7 @@ interface AuthContextType {
     login: (credentials: any) => Promise<void>;
     logout: () => Promise<void>;
     signup: (data: any) => Promise<void>;
+    isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,9 +29,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const checkUser = async () => {
         try {
-            const userData = await authService.getCurrentUser();
-            setUser(userData.user || userData); // Adjust based on API response structure
+            // Add timeout to prevent hanging
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Auth check timeout')), 5000)
+            );
+
+            const userPromise = authService.getCurrentUser();
+
+            const userData = await Promise.race([userPromise, timeoutPromise]) as any;
+            setUser(userData.user || userData);
         } catch (error) {
+            console.log('Auth check failed (expected if not logged in):', error);
             setUser(null);
         } finally {
             setLoading(false);
@@ -43,17 +52,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        await authService.logout();
-        setUser(null);
+        try {
+            await authService.logout();
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            setUser(null);
+            localStorage.removeItem('token');
+        }
     };
 
     const signup = async (data: any) => {
-        await authService.signup(data);
-        await checkUser(); // Auto login or fetch user
+        const response = await authService.signup(data);
+        setUser(response.user || response.data?.user);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, signup }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            logout,
+            signup,
+            isAuthenticated: !!user
+        }}>
             {children}
         </AuthContext.Provider>
     );
