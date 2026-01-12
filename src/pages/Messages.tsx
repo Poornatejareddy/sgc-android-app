@@ -31,9 +31,15 @@ export default function Messages() {
     const fetchConversations = async () => {
         try {
             const data = await chatService.getConversations();
-            setConversations(data);
+            if (Array.isArray(data)) {
+                setConversations(data);
+            } else {
+                setConversations([]);
+                console.error('Invalid conversations data format:', data);
+            }
         } catch (error) {
             console.error('Failed to fetch conversations', error);
+            setConversations([]);
         } finally {
             setLoading(false);
         }

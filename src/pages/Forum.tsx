@@ -17,9 +17,14 @@ export default function Forum() {
     const fetchPosts = async () => {
         try {
             const data = await forumService.getAllPosts();
-            setPosts(data);
+            if (Array.isArray(data)) {
+                setPosts(data);
+            } else {
+                setPosts([]);
+            }
         } catch (error) {
             console.error('Failed to fetch forum posts', error);
+            setPosts([]);
         } finally {
             setLoading(false);
         }

@@ -18,6 +18,7 @@ import AssignmentDetail from './pages/AssignmentDetail';
 import LiveClasses from './pages/LiveClasses';
 import Forum from './pages/Forum';
 import Messages from './pages/Messages';
+import Blogs from './pages/Blogs';
 import Profile from './pages/Profile';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -100,6 +101,12 @@ function App() {
             <Route path="/forum" element={
               <ProtectedRoute>
                 <Forum />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/blogs" element={
+              <ProtectedRoute>
+                <Blogs />
               </ProtectedRoute>
             } />
 

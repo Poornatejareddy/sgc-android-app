@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BottomNav from '../../components/layout/BottomNav';
-import { Bell, Loader2, BookOpen, ClipboardList, Video, ArrowRight } from 'lucide-react';
+import { Bell, Loader2, BookOpen, ClipboardList, Video, ArrowRight, MessageSquare, Newspaper } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { assignmentService } from '../../services/assignmentService';
 import { liveClassService } from '../../services/liveClassService';
@@ -107,7 +107,21 @@ export default function StudentDashboard() {
                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2">
                             <Video className="w-5 h-5 text-purple-600" />
                         </div>
-                        <p className="text-xs font-semibold text-gray-900">Live Classes</p>
+                        <p className="text-xs font-semibold text-gray-900">Live Class</p>
+                    </Link>
+
+                    <Link to="/forum" className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition-transform">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                            <MessageSquare className="w-5 h-5 text-green-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-900">Forum</p>
+                    </Link>
+
+                    <Link to="/blogs" className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition-transform">
+                        <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mb-2">
+                            <Newspaper className="w-5 h-5 text-pink-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-900">Blogs</p>
                     </Link>
                 </div>
 

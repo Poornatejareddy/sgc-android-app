@@ -56,8 +56,8 @@ export const chatService = {
 
     // Create or get a conversation
     createConversation: async (participantId: string): Promise<Conversation> => {
-        const response = await api.post('/chat/conversation', {
-            participantId
+        const response = await api.post('/chat/start', {
+            targetUserId: participantId
         });
         return response.data;
     },
