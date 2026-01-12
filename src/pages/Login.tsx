@@ -63,24 +63,35 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col justify-center px-6 py-8">
-            <div className="w-full max-w-md mx-auto">
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
                 {/* Logo */}
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-6">
                     <div className="w-20 h-20 bg-white rounded-2xl shadow-xl flex items-center justify-center p-3 border-4 border-blue-100">
-                        <img src="/logo.png" alt="ShreeGuruCool" className="w-full h-full object-contain" />
+                        <img
+                            src="/logo.png"
+                            alt="SGC"
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                if (target.parentElement) {
+                                    target.parentElement.innerHTML = '<div class="text-3xl font-bold text-blue-600">SGC</div>';
+                                }
+                            }}
+                        />
                     </div>
                 </div>
 
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h1>
-                    <p className="text-gray-600">Sign in to continue learning</p>
+                    <p className="text-base text-gray-600">Sign in to continue learning</p>
                 </div>
 
-                {/* Form */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Form Card */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <Input
                             label="Email"
                             type="email"
@@ -89,7 +100,6 @@ export default function Login() {
                             icon={<Mail className="w-5 h-5" />}
                             placeholder="your.email@example.com"
                             required
-                            className="h-14 text-base"
                         />
 
                         <Input
@@ -100,12 +110,11 @@ export default function Login() {
                             icon={<Lock className="w-5 h-5" />}
                             placeholder="Enter your password"
                             required
-                            className="h-14 text-base"
                         />
 
                         {error && (
-                            <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div className="p-3 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                                 <p className="text-sm text-red-600 font-medium">{error}</p>
                             </div>
                         )}
@@ -113,7 +122,7 @@ export default function Login() {
                         <Button
                             type="submit"
                             isLoading={loading}
-                            className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                            className="w-full h-12 text-base font-semibold"
                         >
                             {loading ? 'Signing in...' : 'Sign In'}
                         </Button>
@@ -121,14 +130,14 @@ export default function Login() {
                 </div>
 
                 {/* Footer */}
-                <p className="mt-8 text-center text-gray-600">
+                <p className="mt-6 text-center text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link to="/signup" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                    <Link to="/signup" className="font-bold text-blue-600 hover:underline">
                         Create one now
                     </Link>
                 </p>
 
-                <Link to="/welcome" className="block mt-4 text-center text-sm text-gray-500 hover:text-gray-700">
+                <Link to="/welcome" className="block mt-3 text-center text-sm text-gray-500 hover:text-gray-700">
                     ← Back to Welcome
                 </Link>
             </div>
