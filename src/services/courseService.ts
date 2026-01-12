@@ -13,12 +13,12 @@ export interface Course {
 
 export const courseService = {
     getAllCourses: async () => {
-        const response = await api.get('/course'); // Public endpoint
+        const response = await api.get('/courses'); // Public endpoint
         return response.data;
     },
 
     getCourseBySlug: async (slug: string) => {
-        const response = await api.get(`/course/slug/${slug}`);
+        const response = await api.get(`/courses/slug/${slug}`);
         return response.data;
     }
 };

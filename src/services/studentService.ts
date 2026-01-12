@@ -7,7 +7,7 @@ export const studentService = {
     },
 
     getMyCourses: async () => {
-        const response = await api.get('/enrollment/my-courses');
+        const response = await api.get('/enrollments/my-courses');
         return response.data;
     }
 };

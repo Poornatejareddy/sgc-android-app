@@ -2,17 +2,17 @@ import api from './api';
 
 export const materialService = {
     getCourseMaterials: async (courseId: string) => {
-        const response = await api.get(`/material/course/${courseId}`);
+        const response = await api.get(`/materials/course/${courseId}`);
         return response.data;
     },
 
     getMaterialById: async (materialId: string) => {
-        const response = await api.get(`/material/${materialId}`);
+        const response = await api.get(`/materials/${materialId}`);
         return response.data;
     },
 
     markAsViewed: async (materialId: string) => {
-        const response = await api.post(`/material/${materialId}/mark-viewed`);
+        const response = await api.post(`/materials/${materialId}/mark-viewed`);
         return response.data;
     },
 

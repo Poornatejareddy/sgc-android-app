@@ -18,17 +18,17 @@ export interface Assignment {
 
 export const assignmentService = {
     getMyAssignments: async () => {
-        const response = await api.get('/assignment/my-assignments');
+        const response = await api.get('/assignments/my-assignments');
         return response.data;
     },
 
     getAssignmentById: async (assignmentId: string) => {
-        const response = await api.get(`/assignment/${assignmentId}`);
+        const response = await api.get(`/assignments/${assignmentId}`);
         return response.data;
     },
 
     submitAssignment: async (assignmentId: string, formData: FormData) => {
-        const response = await api.post(`/assignment/${assignmentId}/submit`, formData, {
+        const response = await api.post(`/assignments/${assignmentId}/submit`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
