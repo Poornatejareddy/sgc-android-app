@@ -1,27 +1,49 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BottomNav from '../../components/layout/BottomNav';
-import { Bell, Loader2 } from 'lucide-react';
+import { Bell, Loader2, BookOpen, ClipboardList, Video, ArrowRight } from 'lucide-react';
 import { studentService } from '../../services/studentService';
+import { assignmentService } from '../../services/assignmentService';
+import { liveClassService } from '../../services/liveClassService';
+import { format } from 'date-fns';
 
 export default function StudentDashboard() {
     const { user } = useAuth();
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [upcomingAssignments, setUpcomingAssignments] = useState<any[]>([]);
+    const [nextClass, setNextClass] = useState<any>(null);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const data = await studentService.getDashboardStats();
-                setStats(data);
+                const [statsData, assignmentsData, classesData] = await Promise.all([
+                    studentService.getDashboardStats(),
+                    assignmentService.getMyAssignments().catch(() => []),
+                    liveClassService.getUpcomingClasses().catch(() => [])
+                ]);
+
+                setStats(statsData);
+
+                // Get pending assignments
+                const pending = assignmentsData
+                    .filter((a: any) => a.status === 'pending' || !a.status)
+                    .slice(0, 3);
+                setUpcomingAssignments(pending);
+
+                // Get next live class
+                if (classesData.length > 0) {
+                    setNextClass(classesData[0]);
+                }
             } catch (error) {
-                console.error("Failed to fetch dashboard stats", error);
+                console.error("Failed to fetch dashboard data", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStats();
+        fetchDashboardData();
     }, []);
 
     if (loading) {
@@ -65,12 +87,78 @@ export default function StudentDashboard() {
                     </div>
                 </div>
 
+                {/* Quick Actions */}
+                <div className="grid grid-cols-3 gap-3">
+                    <Link to="/courses" className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition-transform">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                            <BookOpen className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-900">Courses</p>
+                    </Link>
+
+                    <Link to="/assignments" className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition-transform">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mb-2">
+                            <ClipboardList className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-900">Assignments</p>
+                    </Link>
+
+                    <Link to="/live-classes" className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition-transform">
+                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                            <Video className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-900">Live Classes</p>
+                    </Link>
+                </div>
+
+                {/* Next Live Class */}
+                {nextClass && (
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900 mb-3">Next Live Class</h2>
+                        <Link to="/live-classes" className="block">
+                            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform">
+                                <div className="flex items-start justify-between mb-2">
+                                    <h3 className="font-semibold text-gray-900 flex-1">{nextClass.title}</h3>
+                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">
+                                        {format(new Date(nextClass.scheduledAt), 'MMM dd')}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    {format(new Date(nextClass.scheduledAt), 'hh:mm a')} • {nextClass.duration} mins
+                                </p>
+                            </div>
+                        </Link>
+                    </div>
+                )}
+
+                {/* Pending Assignments */}
+                {upcomingAssignments.length > 0 && (
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h2 className="text-lg font-bold text-gray-900">Pending Assignments</h2>
+                            <Link to="/assignments" className="text-sm text-blue-600 font-medium flex items-center gap-1">
+                                View All <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                        <div className="space-y-3">
+                            {upcomingAssignments.map((assignment: any) => (
+                                <Link key={assignment._id} to={`/assignment/${assignment._id}`} className="block">
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform">
+                                        <h3 className="font-semibold text-gray-900 mb-1">{assignment.title}</h3>
+                                        <p className="text-xs text-gray-500">Due: {format(new Date(assignment.dueDate), 'MMM dd, yyyy')}</p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Recent Courses */}
                 <div>
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-lg font-bold text-gray-900">Continue Learning</h2>
                         {enrolledCourses.length > 0 && (
-                            <button className="text-sm text-blue-600 font-medium">See All</button>
+                            <Link to="/courses" className="text-sm text-blue-600 font-medium">See All</Link>
                         )}
                     </div>
 
@@ -80,28 +168,30 @@ export default function StudentDashboard() {
                                 <p>No courses enrolled yet.</p>
                             </div>
                         ) : (
-                            enrolledCourses.map((course: any) => (
-                                <div key={course.id} className="bg-white p-4 rounded-xl border border-gray-100 flex gap-4 shadow-sm active:scale-[0.98] transition-transform">
-                                    <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                                        {course.image ? (
-                                            <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-xs p-1 text-center">
-                                                {course.title.substring(0, 2)}
+                            enrolledCourses.slice(0, 3).map((course: any) => (
+                                <Link key={course.id} to={`/course/${course.slug || course.id}`} className="block">
+                                    <div className="bg-white p-4 rounded-xl border border-gray-100 flex gap-4 shadow-sm active:scale-[0.98] transition-transform">
+                                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                            {course.image ? (
+                                                <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-xs p-1 text-center">
+                                                    {course.title.substring(0, 2)}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-semibold text-gray-900 line-clamp-1">{course.title}</h4>
+                                            <p className="text-xs text-gray-500 mt-1">{course.progress}% Completed</p>
+                                            <div className="mt-3 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+                                                    style={{ width: `${course.progress}%` }}
+                                                />
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-gray-900 line-clamp-1">{course.title}</h4>
-                                        <p className="text-xs text-gray-500 mt-1">{course.progress}% Completed</p>
-                                        <div className="mt-3 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-blue-500 rounded-full transition-all duration-1000"
-                                                style={{ width: `${course.progress}%` }}
-                                            />
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))
                         )}
                     </div>

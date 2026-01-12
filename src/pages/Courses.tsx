@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import BottomNav from '../components/layout/BottomNav';
 import { courseService, type Course } from '../services/courseService';
 import { Loader2, Search } from 'lucide-react';
@@ -48,24 +49,25 @@ export default function Courses() {
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
                         {filteredCourses.map((course) => (
-                            <div key={course._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden active:scale-[0.99] transition-transform">
-                                <div className="h-32 bg-gray-200 relative">
-                                    {course.image && (
-                                        <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                                    )}
-                                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                                        ₹{course.price}
+                            <Link key={course._id} to={`/course/${course.slug || course._id}`} className="block">
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden active:scale-[0.99] transition-transform">
+                                    <div className="h-32 bg-gray-200 relative">
+                                        {course.image && (
+                                            <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                                        )}
+                                        <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                                            ₹{course.price}
+                                        </div>
+                                    </div>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-gray-900 line-clamp-2">{course.title}</h3>
+                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{course.description}</p>
+                                        <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                                            <span>{course.instructorName || 'Instructor'}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-gray-900 line-clamp-2">{course.title}</h3>
-                                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{course.description}</p>
-                                    <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                                        <span>{course.instructorName || 'Instructor'}</span>
-                                        {/* <span>{course.batchCount || 0} Batches</span> */}
-                                    </div>
-                                </div>
-                            </div>
+                            </Link>
                         ))}
                         {filteredCourses.length === 0 && (
                             <p className="text-center text-gray-500 mt-8">No courses found matching "{searchTerm}"</p>
