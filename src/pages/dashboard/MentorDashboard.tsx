@@ -1,9 +1,39 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BottomNav from '../../components/layout/BottomNav';
-import { Bell, Users, FileText } from 'lucide-react';
+import { Bell, Loader2, Users, BookOpen, ClipboardList, Video } from 'lucide-react';
 
 export default function MentorDashboard() {
     const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalStudents: 0,
+        activeCourses: 0,
+        pendingAssignments: 0,
+        upcomingClasses: 0
+    });
+
+    useEffect(() => {
+        // Simulate loading mentor stats
+        setTimeout(() => {
+            setStats({
+                totalStudents: 45,
+                activeCourses: 3,
+                pendingAssignments: 12,
+                upcomingClasses: 2
+            });
+            setLoading(false);
+        }, 500);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="pb-24 min-h-screen bg-gray-50">
@@ -18,36 +48,87 @@ export default function MentorDashboard() {
                 </button>
             </header>
 
-            {/* Content */}
             <main className="px-6 py-6 space-y-6">
-                {/* Quick Actions */}
+                {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
-                    <button className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-transform">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-full">
-                            <Users className="w-6 h-6" />
+                    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                            <Users className="w-6 h-6 text-blue-600" />
                         </div>
-                        <span className="text-sm font-medium text-gray-700">Students</span>
-                    </button>
-                    <button className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition-transform">
-                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-full">
-                            <FileText className="w-6 h-6" />
+                        <p className="text-2xl font-bold text-gray-900">{stats.totalStudents}</p>
+                        <p className="text-xs text-gray-500 mt-1">Total Students</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                            <BookOpen className="w-6 h-6 text-green-600" />
                         </div>
-                        <span className="text-sm font-medium text-gray-700">Materials</span>
-                    </button>
+                        <p className="text-2xl font-bold text-gray-900">{stats.activeCourses}</p>
+                        <p className="text-xs text-gray-500 mt-1">Active Courses</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                        <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+                            <ClipboardList className="w-6 h-6 text-orange-600" />
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{stats.pendingAssignments}</p>
+                        <p className="text-xs text-gray-500 mt-1">Pending Reviews</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                        <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                            <Video className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{stats.upcomingClasses}</p>
+                        <p className="text-xs text-gray-500 mt-1">Upcoming Classes</p>
+                    </div>
                 </div>
 
-                {/* Overview Stats */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Overview</h3>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Students</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">48</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Active Classes</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">3</p>
-                        </div>
+                {/* Quick Actions */}
+                <div>
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+                    <div className="space-y-3">
+                        <Link to="/mentor/students" className="block">
+                            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <Users className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Manage Students</h3>
+                                        <p className="text-xs text-gray-500">View and manage your students</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/mentor/courses" className="block">
+                            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <BookOpen className="w-5 h-5 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">My Courses</h3>
+                                        <p className="text-xs text-gray-500">Manage course content</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/live-classes" className="block">
+                            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <Video className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Live Classes</h3>
+                                        <p className="text-xs text-gray-500">Schedule and manage classes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </main>
